@@ -27,12 +27,10 @@
             <time-down :type="2"
                        :endTime="product.seckillItemPO.endTime" :startTime="product.seckillItemPO.startTime"
                        @time-end="endSeckill"></time-down>
-            <!--<span>距开始：<span>03</span>:<span>56</span>:<span>45</span></span>-->
           </h3>
           <h6>
             <span>{{itemSellPoint}}</span>
             <span class="price">
-
               <em>¥</em><i>{{Number(itemPrice/1000)*(discount).toFixed(2)}}</i></span>
           </h6>
         </div>
@@ -46,7 +44,7 @@
                     classStyle="main-btn"
                     style="width: 145px;height: 50px;line-height: 48px"></y-button>
           <y-button text="现在购买"
-                    @btnClick="checkout(product.productId)"
+                    @btnClick="checkout(product.id)"
                     style="width: 145px;height: 50px;line-height: 48px;margin-left: 10px"></y-button>
         </div>
       </div>
@@ -88,9 +86,7 @@
         productMsg: {},
         small: [], // 小图
         big: '', // 大图
-        product: {
-          salePrice: 0
-        },
+        product: {},
         productNum: 1,
         userId: '',
         isSeckill: false // 是否为秒杀商品
@@ -101,15 +97,15 @@
     },
     methods: {
       ...mapMutations(['ADD_CART', 'ADD_ANIMATION', 'SHOW_CART']),
-      _productDet (productId) {
-        productDet({id: productId}).then(res => {
+      _productDet (id) {
+        productDet(id).then(res => {
           let item = res.data
           this.product = item
-          this.isSeckill = item.isSeckill === 1
           this.productMsg = item.detail || ''
           this.small = JSON.parse(item.imageUrl)
           this.big = this.small[0]
-          if (this.isSeckill) {
+          if (item.isSeckillItem === 1 && this.product.seckillItemPO.endTime > new Date().getTime()) {
+            this.isSeckill = true
             this.itemName = item.seckillItemPO.itemTitle
             this.itemPrice = item.seckillItemPO.itemPrice
             this.discount = item.seckillItemPO.discount
@@ -159,8 +155,8 @@
           }
         }
       },
-      checkout (productId) {
-        this.$router.push({path: '/checkout', query: {productId, num: this.productNum}})
+      checkout (itemId) {
+        this.$router.push({path: '/checkout', query: {itemId, num: this.productNum}})
       },
       editNum (num) {
         this.productNum = num

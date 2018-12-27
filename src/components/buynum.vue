@@ -9,7 +9,7 @@
       <span class="num">
         <input type="text"
                :class="{show:show}"
-               v-model="Num>=limit?limit:Num"
+               v-model="Num >= limit?limit:Num"
                @blur="blur()"
                maxlength="2">
                   <ul ref="ul">

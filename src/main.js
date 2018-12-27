@@ -77,7 +77,8 @@ router.beforeEach(function (to, from, next) {
       if (flag) {
         next()
       } else {
-        next('/login')
+        // next('/login')
+        next({name: 'login', params: {fromPath: to.fullPath}})
       }
 
       // if (whiteList.indexOf(to.path) !== -1) { // 白名单

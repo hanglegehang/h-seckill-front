@@ -29,8 +29,8 @@ module.exports = {
     assetsPublicPath: '/',
     proxyTable: {
       '/api': {
-        // target: 'http://127.0.0.1:8001', // 请求本地
-        target: 'http://120.25.105.200:8001', //
+        target: 'http://127.0.0.1:8001', // 请求本地
+        // target: 'http://120.25.105.200:8001', //
         pathRewrite: {
           '^/api': ''
         }

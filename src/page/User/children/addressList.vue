@@ -19,8 +19,9 @@
                  :class="{'defalut-address':item.isDefault}"></a>
             </div>
             <div class="operation">
-              <el-button type="primary" icon="edit" size="small"  @click="update(item)"></el-button>
-              <el-button type="danger" icon="delete" size="small" :data-id="item.addressId" @click="del(item.addressId,i)"></el-button>
+              <el-button type="primary" icon="edit" size="small" @click="update(item)"></el-button>
+              <el-button type="danger" icon="delete" size="small" :data-id="item.addressId"
+                         @click="del(item.addressId,i)"></el-button>
             </div>
           </div>
         </div>
@@ -51,18 +52,19 @@
         <y-button text='保存'
                   class="btn"
                   :classStyle="btnHighlight?'main-btn':'disabled-btn'"
-                  @btnClick="save({userId:userId,addressId:msg.addressId,userName:msg.userName,tel:msg.tel,streetName:msg.streetName,isDefault:msg.isDefault})">
+                  @btnClick="save({userId:userId,addressId:msg.id,userName:msg.tel,tel:msg.phone,streetName:msg.streetName,isDefault:msg.isDefault})">
         </y-button>
       </div>
     </y-popup>
   </div>
 </template>
 <script>
-  import { addressList, addressUpdate, addressAdd, addressDel } from '/api/goods'
+  import {addressList, addressUpdate, addressAdd, addressDel} from '/api/goods'
   import YButton from '/components/YButton'
   import YPopup from '/components/popup'
   import YShelf from '/components/shelf'
-  import { getStore } from '/utils/storage'
+  import {getStore} from '/utils/storage'
+
   export default {
     data () {
       return {
@@ -146,10 +148,11 @@
       // 修改
       update (item) {
         this.popupOpen = true
+        console.log(item)
         if (item) {
           this.popupTitle = '管理收货地址'
           this.msg.userName = item.userName
-          this.msg.tel = item.tel
+          this.msg.tel = item.phone
           this.msg.streetName = item.streetName
           this.msg.isDefault = item.isDefault
           this.msg.addressId = item.addressId
@@ -196,10 +199,10 @@
       color: #838383;
     }
     .address {
-      margin-left: 115px; 
+      margin-left: 115px;
     }
     .tel {
-      margin-left: 195px; 
+      margin-left: 195px;
     }
   }
 

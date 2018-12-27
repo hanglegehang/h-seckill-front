@@ -334,7 +334,6 @@
             break
           }
         }
-        console.log(this.$route.path)
         if (flag) {
         // if (this.$route.path === '/goods' || this.$route.path === '/home' || this.$route.path === '/goodsDetails' || this.$route.path === '/thanks') {
           var st = document.documentElement.scrollTop || document.body.scrollTop

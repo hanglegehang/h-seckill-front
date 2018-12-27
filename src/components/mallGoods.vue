@@ -15,19 +15,19 @@
       </h3>
       <div class="good-price pr">
         <div class="ds pa">
-          <a @click="openProduct(product.itemId)">
-            <y-button text="查看详情" style="margin: 0 5px"></y-button>
-          </a>
           <y-button text="加入购物车"
                     style="margin: 0 5px"
                     @btnClick="addCart(product.id,Number(itemPrice/1000)*(discount).toFixed(2),itemName,itemUrl)"
                     classStyle="main-btn"
           ></y-button>
+          <a @click="openProduct(product.itemId)">
+            <y-button text="立即购买" style="margin: 0 5px"></y-button>
+          </a>
         </div>
-        <p v-if="product.isSeckillItem === 1"><s style="font-size: 14px"><span>￥</span>{{Number(itemPrice/1000).toFixed(2)}}</s>
+        <p v-if="isSeckill"><s style="font-size: 14px"><span>￥</span>{{Number(itemPrice/1000).toFixed(2)}}</s>
           <span style="font-size:14px">￥</span>{{Number(itemPrice/1000)*(discount).toFixed(2)}}
         </p>
-        <p v-if="product.isSeckillItem === 0">
+        <p v-else-if="!isSeckill">
           <span style="font-size:14px">￥</span>{{Number(itemPrice/1000).toFixed(2)}}
         </p>
       </div>
@@ -44,17 +44,19 @@
   export default {
     props: {
       product: {
-        salePrice: 0
+        itemId: 0, // 关联商品ID
+        seckillItemPO: {}, // 秒杀商品详情
+        itemPO: {} // 普通商品详情
       }
     },
     data () {
       return {
-        itemUrl: '',
-        itemName: '',
-        itemSellPoint: '',
-        itemPrice: 0,
-        discount: 0,
-        isSeckill: false
+        itemUrl: '', // 商品图片地址
+        itemName: '', // 商品名称
+        itemSellPoint: '', // 商品卖点
+        itemPrice: 0, // 商品价格
+        discount: 0, // 商品折扣
+        isSeckill: false // 是否为秒杀商品
       }
     },
     methods: {
@@ -98,15 +100,12 @@
     },
     mounted () {
       this.itemUrl = this.product.picUrl
-      if (this.product.isSeckillItem === 1) {
-        console.log(this.product.seckillItemPO)
+      if (this.product.isSeckillItem === 1 && this.product.seckillItemPO.endTime > new Date().getTime()) {
         this.itemName = this.product.seckillItemPO.itemTitle
         this.itemSellPoint = this.product.seckillItemPO.itemSellPoint
         this.itemPrice = this.product.seckillItemPO.itemPrice
         this.discount = this.product.seckillItemPO.discount
-        if (this.product.seckillItemPO.endTime > new Date().getTime()) {
-          this.isSeckill = true
-        }
+        this.isSeckill = true
       } else {
         this.itemName = this.product.itemPO.title
         this.itemSellPoint = this.product.itemPO.sellPoint
