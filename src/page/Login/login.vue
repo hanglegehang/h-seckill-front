@@ -58,7 +58,7 @@
   import YFooter from '/common/footer'
   import YButton from '/components/YButton'
   import {userLogin, geetest} from '/api/index.js'
-  import {addCart} from '/api/goods.js'
+  import {addCart} from '../../api/goods.js'
   import {setStore, getStore, removeStore} from '/utils/storage.js'
 
   require('../../../static/geetest/gt.js')
@@ -142,7 +142,6 @@
         if (locaCart && locaCart.length) {
           locaCart.forEach(item => {
             cartArr.push({
-              userId: getStore('userId'),
               productId: item.productId,
               productNum: item.productNum
             })
@@ -176,7 +175,6 @@
         fromPath = fromPath === '' || fromPath === '/login' || typeof fromPath === 'undefined' ? '/' : fromPath
         userLogin(params).then(res => {
           if (res.code === 200) {
-            console.log(res)
             // 登录后添加当前缓存中的购物车
             if (this.cart.length) {
               for (var i = 0; i < this.cart.length; i++) {

@@ -81,22 +81,22 @@
                           <li class="clearfix" v-for="(item,i) in cartList" :key="i">
                             <div class="cart-item">
                               <div class="cart-item-inner">
-                                <a @click="openProduct(item.productId)">
+                                <a @click="openProduct(item.id)">
                                   <div class="item-thumb">
-                                    <img :src="item.productImg">
+                                    <img :src="item.itemImg">
                                   </div>
                                   <div class="item-desc">
                                     <div class="cart-cell"><h4>
-                                      <a href="" v-text="item.productName"></a>
+                                      <a href="" v-text="item.itemName"></a>
                                     </h4>
                                       <!-- <p class="attrs"><span>白色</span></p> -->
                                       <h6><span class="price-icon">¥</span><span
-                                        class="price-num">{{item.salePrice}}</span><span
-                                        class="item-num">x {{item.productNum}}</span>
+                                        class="price-num">{{Number(item.price).toFixed(2)}}</span><span
+                                        class="item-num">x {{item.buyNum}}</span>
                                       </h6></div>
                                   </div>
                                 </a>
-                                <div class="del-btn del" @click="delGoods(item.productId)">删除</div>
+                                <div class="del-btn del" @click="delGoods(item.itemId)">删除</div>
                               </div>
                             </div>
                           </li>
@@ -105,7 +105,7 @@
                       <!--总件数-->
                       <div class="nav-cart-total"><p>共 <strong>{{totalNum}}</strong> 件商品</p> <h5>合计：<span
                         class="price-icon">¥</span><span
-                        class="price-num">{{totalPrice}}</span></h5>
+                        class="price-num">{{Number(totalPrice).toFixed(2)}}</span></h5>
                         <h6>
                           <y-button classStyle="main-btn"
                                     style="height: 40px;width: 100%;margin: 0;color: #fff;font-size: 14px;line-height: 38px"
@@ -150,7 +150,7 @@
 <script>
   import YButton from '/components/YButton'
   import {mapMutations, mapState} from 'vuex'
-  import {getCartList, cartDel, getQuickSearch} from '/api/goods'
+  import {getCartList, cartDel, getQuickSearch} from '../api/goods'
   import {loginOut, navList} from '/api/index'
   import {setStore, getStore, removeStore} from '/utils/storage'
   // import store from '../store/'
@@ -184,7 +184,7 @@
       totalPrice () {
         var totalPrice = 0
         this.cartList && this.cartList.forEach(item => {
-          totalPrice += (item.productNum * item.salePrice)
+          totalPrice += (item.buyNum * item.price)
         })
         return totalPrice.toFixed(2)
       },
@@ -192,7 +192,7 @@
       totalNum () {
         var totalNum = 0
         this.cartList && this.cartList.forEach(item => {
-          totalNum += (item.productNum)
+          totalNum += (item.buyNum)
         })
         return totalNum
       }
@@ -302,21 +302,23 @@
       },
       // 登陆时获取一次购物车商品
       _getCartList () {
-        getCartList({userId: getStore('userId')}).then(res => {
-          if (res.success === true) {
-            setStore('buyCart', res.result)
+        getCartList().then(res => {
+          if (res.code === 200) {
+            setStore('buyCart', res.data)
           }
           // 重新初始化一次本地数据
         }).then(this.INIT_BUYCART)
       },
       // 删除商品
-      delGoods (productId) {
+      delGoods (itemId) {
         if (this.login) { // 登陆了
-          cartDel({userId: getStore('userId'), productId}).then(res => {
-            this.EDIT_CART({productId})
+          cartDel([itemId]).then(res => {
+            if (res.code === 200) {
+              this.EDIT_CART({itemId})
+            }
           })
         } else {
-          this.EDIT_CART({productId})
+          this.EDIT_CART({itemId})
         }
       },
       toCart () {
@@ -335,7 +337,7 @@
           }
         }
         if (flag) {
-        // if (this.$route.path === '/goods' || this.$route.path === '/home' || this.$route.path === '/goodsDetails' || this.$route.path === '/thanks') {
+          // if (this.$route.path === '/goods' || this.$route.path === '/home' || this.$route.path === '/goodsDetails' || this.$route.path === '/thanks') {
           var st = document.documentElement.scrollTop || document.body.scrollTop
           st >= 100 ? this.st = true : this.st = false
           // 计算小圆当前位置
@@ -343,8 +345,6 @@
           this.positionL = num.getBoundingClientRect().left
           this.positionT = num.getBoundingClientRect().top
           this.ADD_ANIMATION({cartPositionL: this.positionL, cartPositionT: this.positionT})
-        } else {
-          return
         }
       },
       // 退出登陆

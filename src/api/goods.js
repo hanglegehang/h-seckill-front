@@ -6,16 +6,16 @@ export const getAllGoods = (params) => {
   return http.fetchGet('/goods/allGoods', params)
 }
 // 获取购物车列表
-export const getCartList = (params) => {
-  return http.fetchPost('/member/cartList', params)
+export const getCartList = () => {
+  return http.fetchPost(`${baseUrl}/cart/list`)
 }
 // 加入购物车
 export const addCart = (params) => {
-  return http.fetchPost('/member/addCart', params)
+  return http.fetchPost(`${baseUrl}/cart/add`, params)
 }
 // 删除购物车
 export const delCart = (params) => {
-  return http.fetchPost('/member/delCart', params)
+  return http.fetchPost(`${baseUrl}/cart/delete`, params)
 }
 // 删除购物车勾选商品
 export const delCartChecked = (params) => {
@@ -31,7 +31,7 @@ export const editCheckAll = (params) => {
 }
 // 删除整条购物车
 export const cartDel = (params) => {
-  return http.fetchPost('/member/cartDel', params)
+  return http.fetchPost(`${baseUrl}/cart/delete`, params)
 }
 // 获取用户地址
 export const addressList = () => {

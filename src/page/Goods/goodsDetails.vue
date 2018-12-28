@@ -7,13 +7,13 @@
           <div class="thumbnail">
             <ul>
               <li v-for="(item,i) in small" :key="i" :class="{on:big===item}" @click="big=item">
-                <img v-lazy="item" :alt="itemName">
+                <img v-lazy="item" :alt="item.itemName">
               </li>
             </ul>
           </div>
           <div class="thumb">
             <div class="big">
-              <img :src="big" :alt="big">
+              <img :src="big" :alt="item.itemName">
             </div>
           </div>
         </div>
@@ -21,30 +21,30 @@
       <!--右边-->
       <div class="banner">
         <div class="sku-custom-title">
-          <h5>{{itemName}}</h5>
+          <h5>{{item.title}}</h5>
           <h3 v-if="isSeckill">
             <span>限时秒杀</span>
             <time-down :type="2"
-                       :endTime="product.seckillItemPO.endTime" :startTime="product.seckillItemPO.startTime"
+                       :endTime="item.endTime" :startTime="item.startTime"
                        @time-end="endSeckill"></time-down>
           </h3>
           <h6>
-            <span>{{itemSellPoint}}</span>
+            <span>{{item.sellPoint}}</span>
             <span class="price">
-              <em>¥</em><i>{{Number(itemPrice/1000)*(discount).toFixed(2)}}</i></span>
+              <em>¥</em><i>{{item.nowPrice}}</i></span>
           </h6>
         </div>
         <div class="num">
           <span class="params-name">数量</span>
-          <buy-num @edit-num="editNum" :limit="1"></buy-num>
+          <buy-num @edit-num="editNum" :limit="item.itemSellLimit"></buy-num>
         </div>
         <div class="buy">
           <y-button text="加入购物车"
-                    @btnClick="addCart(product.id,Number(itemPrice/1000)*(discount).toFixed(2),itemName,small[0])"
+                    @btnClick="addCart(item.id,item.nowPrice,item.title,small[0])"
                     classStyle="main-btn"
                     style="width: 145px;height: 50px;line-height: 48px"></y-button>
           <y-button text="现在购买"
-                    @btnClick="checkout(product.id)"
+                    @btnClick="buyNow(item.id)"
                     style="width: 145px;height: 50px;line-height: 48px;margin-left: 10px"></y-button>
         </div>
       </div>
@@ -67,7 +67,7 @@
   </div>
 </template>
 <script>
-  import {productDet, addCart, seckillNow} from '/api/goods'
+  import {productDet, addCart} from '../../api/goods'
   import {mapMutations, mapState} from 'vuex'
   import YShelf from '/components/shelf'
   import BuyNum from '/components/buynum'
@@ -78,18 +78,13 @@
   export default {
     data () {
       return {
-        itemName: '',
-        itemSellPoint: '',
-        itemPrice: 0,
-        discount: 0,
         now: 0,
         productMsg: {},
         small: [], // 小图
         big: '', // 大图
-        product: {},
-        productNum: 1,
-        userId: '',
-        isSeckill: false // 是否为秒杀商品
+        buyNum: 1,
+        isSeckill: false, // 是否为秒杀商品
+        item: {}
       }
     },
     computed: {
@@ -99,48 +94,37 @@
       ...mapMutations(['ADD_CART', 'ADD_ANIMATION', 'SHOW_CART']),
       _productDet (id) {
         productDet(id).then(res => {
-          let item = res.data
-          this.product = item
-          this.productMsg = item.detail || ''
-          this.small = JSON.parse(item.imageUrl)
+          this.item = res.data
+          this.productMsg = this.item.detail || ''
+          this.small = JSON.parse(this.item.imageUrl)
           this.big = this.small[0]
-          if (item.isSeckillItem === 1 && this.product.seckillItemPO.endTime > new Date().getTime()) {
+          this.item.nowPrice = (this.item.price / 1000 * this.item.discount).toFixed(2)
+          this.item.price = (this.item.price / 1000).toFixed(2)
+          if (this.item.isSeckill === 1 && this.item.endTime > new Date().getTime()) {
             this.isSeckill = true
-            this.itemName = item.seckillItemPO.itemTitle
-            this.itemPrice = item.seckillItemPO.itemPrice
-            this.discount = item.seckillItemPO.discount
-            this.itemSellPoint = item.seckillItemPO.itemSellPoint
-            seckillNow().then(res => {
-              this.now = res.data
-            })
-          } else {
-            this.itemName = item.title
-            this.itemPrice = item.price
-            this.discount = item.discount
-            this.itemSellPoint = item.sellPoint
           }
         })
       },
       addCart (id, price, name, img) {
         if (!this.showMoveImg) {     // 动画是否在运动
           if (this.login) { // 登录了 直接存在用户名下
-            addCart({userId: this.userId, productId: id, productNum: this.productNum}).then(res => {
+            addCart([{itemId: id, buyNum: this.buyNum}]).then(res => {
               // 并不重新请求数据
               this.ADD_CART({
-                productId: id,
-                salePrice: price,
-                productName: name,
-                productImg: img,
-                productNum: this.productNum
+                itemId: id,
+                price: price,
+                itemName: name,
+                itemImg: img,
+                buyNum: this.buyNum
               })
             })
           } else { // 未登录 vuex
             this.ADD_CART({
-              productId: id,
-              salePrice: price,
-              productName: name,
-              productImg: img,
-              productNum: this.productNum
+              itemId: id,
+              price: price,
+              itemName: name,
+              itemImg: img,
+              buyNum: this.buyNum
             })
           }
           // 加入购物车动画
@@ -155,11 +139,11 @@
           }
         }
       },
-      checkout (itemId) {
-        this.$router.push({path: '/checkout', query: {itemId, num: this.productNum}})
+      buyNow (itemId) {
+        this.$router.push({path: '/checkout', query: {itemId, num: this.buyNum}})
       },
       editNum (num) {
-        this.productNum = num
+        this.buyNum = num
       },
       endSeckill () {
         this.isSeckill = false

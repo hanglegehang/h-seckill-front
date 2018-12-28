@@ -3,6 +3,9 @@
   <div class="time-down" v-else-if="type===2">
     {{msg}}
     <span v-if="d>0">{{d}}</span>
+    <template v-if="d>0">
+      :
+    </template>
     <span>{{h}}</span>
     :
     <span>{{m}}</span>

@@ -8,7 +8,8 @@ import {
   REDUCE_CART,
   EDIT_CART
 } from './mutation-types'
-import { setStore, getStore } from '../utils/storage'
+import {setStore, getStore} from '../utils/storage'
+
 export default {
   // 网页初始化时从本地缓存获取购物车数据
   [INIT_BUYCART] (state) {
@@ -18,27 +19,27 @@ export default {
     }
   },
   // 加入购物车
-  [ADD_CART] (state, {productId, salePrice, productName, productImg, productNum = 1}) {
+  [ADD_CART] (state, {itemId, price, itemName, itemImg, buyNum = 1}) {
     let cart = state.cartList // 购物车
     let falg = true
     let goods = {
-      productId,
-      salePrice,
-      productName,
-      productImg
+      itemId,
+      price,
+      itemName,
+      itemImg
     }
     if (cart.length) {        // 有内容
       cart.forEach(item => {
-        if (item.productId === productId) {
-          if (item.productNum >= 0) {
+        if (item.itemId === itemId) {
+          if (item.buyNum >= 0) {
             falg = false
-            item.productNum += productNum
+            item.buyNum += buyNum
           }
         }
       })
     }
     if (!cart.length || falg) {
-      goods.productNum = productNum
+      goods.buyNum = buyNum
       goods.checked = '1'
       cart.push(goods)
     }
@@ -88,18 +89,18 @@ export default {
     setStore('buyCart', state.cartList)
   },
   // 修改购物车
-  [EDIT_CART] (state, {productId, productNum, checked}) {
+  [EDIT_CART] (state, {itemId, buyNum, checked}) {
     let cart = state.cartList
-    if (productNum) {
+    if (buyNum) {
       cart.forEach((item, i) => {
-        if (item.productId === productId) {
-          item.productNum = productNum
+        if (item.itemId === itemId) {
+          item.buyNum = buyNum
           item.checked = checked
         }
       })
-    } else if (productId) {
+    } else if (itemId) {
       cart.forEach((item, i) => {
-        if (item.productId === productId) {
+        if (item.itemId === itemId) {
           cart.splice(i, 1)
         }
       })

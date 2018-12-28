@@ -8,12 +8,12 @@
       <y-shelf title="收货信息">
         <div slot="content">
           <ul class="address-item-list clearfix">
-            <li v-for="(item,i) in addList"
+            <li v-for="(address,i) in addList"
                 :key="i"
                 class="address pr"
-                :class="{checked:addressId === item.id}"
-                @click="chooseAddress(item.id, item.userName, item.phone, item.streetName)">
-           <span v-if="addressId === item.id" class="pa">
+                :class="{checked:addressId === address.id}"
+                @click="chooseAddress(address.id, address.userName, address.phone, address.streetName)">
+           <span v-if="addressId === address.id" class="pa">
              <svg viewBox="0 0 1473 1024" width="17.34375" height="12">
              <path
                d="M1388.020 57.589c-15.543-15.787-37.146-25.569-61.033-25.569s-45.491 9.782-61.023 25.558l-716.054 723.618-370.578-374.571c-15.551-15.769-37.151-25.537-61.033-25.537s-45.482 9.768-61.024 25.527c-15.661 15.865-25.327 37.661-25.327 61.715 0 24.053 9.667 45.849 25.327 61.715l431.659 436.343c15.523 15.814 37.124 25.615 61.014 25.615s45.491-9.802 61.001-25.602l777.069-785.403c15.624-15.868 25.271-37.66 25.271-61.705s-9.647-45.837-25.282-61.717M1388.020 57.589z"
@@ -21,12 +21,12 @@
                </path>
              </svg>
              </span>
-              <p>收货人: {{item.userName}} {{item.isDefault === 1 ? '(默认地址)' : ''}}</p>
-              <p class="street-name ellipsis">收货地址: {{item.streetName}}</p>
-              <p>手机号码: {{item.phone}}</p>
+              <p>收货人: {{address.userName}} {{address.isDefault === 1 ? '(默认地址)' : ''}}</p>
+              <p class="street-name ellipsis">收货地址: {{address.streetName}}</p>
+              <p>手机号码: {{address.phone}}</p>
               <div class="operation-section">
-                <span class="update-btn" style="font-size:12px" @click="update(item)">修改</span>
-                <span class="delete-btn" style="font-size:12px" :data-id="item.id" @click="del(item.id)">删除</span>
+                <span class="update-btn" style="font-size:12px" @click="update(address)">修改</span>
+                <span class="delete-btn" style="font-size:12px" :data-id="address.id" @click="del(address.id)">删除</span>
               </div>
             </li>
 
@@ -51,20 +51,20 @@
               </div>
               <!--列表-->
               <div class="cart-table" v-for="(item,i) in cartList" :key="i" v-if="item.checked === '1'">
-                <div class="cart-group divide pr" :data-productid="item.productId">
+                <div class="cart-group divide pr" :data-productid="item.id">
                   <div class="cart-top-items">
                     <div class="cart-items clearfix">
                       <!--图片-->
                       <div class="items-thumb fl">
                         <img :alt="item.itemName"
                              :src="item.itemImg">
-                        <a @click="goodsDetails(productId)" :title="item.itemName" target="_blank"></a>
+                        <a @click="goodsDetails(itemId)" :title="item.title" target="_blank"></a>
                       </div>
                       <!--信息-->
                       <div class="name hide-row fl">
                         <div class="name-table">
-                          <a @click="goodsDetails(productId)" :title="item.itemName" target="_blank"
-                             v-text="item.itemName"></a>
+                          <a @click="goodsDetails(itemId)" :title="item.title" target="_blank"
+                             v-text="item.title"></a>
                           <!-- <ul class="attribute">
                             <li>白色</li>
                           </ul> -->
@@ -80,7 +80,7 @@
                         </div>
                         <!--单价-->
                         <div class="price">¥ {{item.nowPrice}}</div>
-                        <div v-if="isSeckill" class="itemPrice">¥ {{item.itemPrice}}</div>
+                        <div v-if="isSeckill" class="itemPrice">¥ {{item.price}}</div>
                       </div>
                     </div>
                   </div>
@@ -150,7 +150,6 @@
   import YPopup from '/components/popup'
   import YHeader from '/common/header'
   import YFooter from '/common/footer'
-  import {getStore} from '/utils/storage'
 
   export default {
     data () {
@@ -160,8 +159,8 @@
         id: '0',
         popupOpen: false,
         popupTitle: '管理收货地址',
-        num: '', // 立刻购买
-        productId: '',
+        num: '',
+        itemId: '',
         msg: {
           addressId: '',
           userName: '',
@@ -172,7 +171,6 @@
         userName: '',
         phone: '',
         streetName: '',
-        userId: '',
         orderTotal: 0,
         submit: false,
         submitOrder: '提交订单'
@@ -206,7 +204,7 @@
         window.open(window.location.origin + '#/goodsDetails/' + id)
       },
       _getCartList () {
-        getCartList({userId: this.userId}).then(res => {
+        getCartList().then(res => {
           this.cartList = res.result
         })
       },
@@ -309,15 +307,15 @@
         this.streetName = streetName
       },
       // 修改
-      update (item) {
+      update (address) {
         this.popupOpen = true
-        if (item) {
+        if (address) {
           this.popupTitle = '管理收货地址'
-          this.msg.userName = item.userName
-          this.msg.phone = item.phone
-          this.msg.streetName = item.streetName
-          this.msg.isDefault = item.isDefault
-          this.msg.addressId = item.id
+          this.msg.userName = address.userName
+          this.msg.phone = address.phone
+          this.msg.streetName = address.streetName
+          this.msg.isDefault = address.isDefault
+          this.msg.addressId = address.id
         } else {
           this.popupTitle = '新增收货地址'
           this.msg.userName = ''
@@ -345,31 +343,24 @@
       _productDet (id) {
         productDet(id).then(res => {
           let item = res.data
-          item.checked = '1'
-          if (item.isSeckill === 1 && item.seckillItemPO.endTime > new Date().getTime()) {
+          item.nowPrice = (item.price / 1000 * item.discount).toFixed(2)
+          item.price = (item.price / 1000).toFixed(2)
+          if (item.isSeckill === 1 && item.endTime > new Date().getTime()) {
             this.isSeckill = true
-            item.itemName = item.seckillItemPO.itemTitle
-            item.itemPrice = (item.seckillItemPO.itemPrice / 1000).toFixed(2)
-            item.nowPrice = (item.seckillItemPO.itemPrice / 1000 * item.seckillItemPO.discount).toFixed(2)
-          } else {
-            item.itemName = item.title
-            item.itemPrice = item.price
-            item.nowPrice = (item.itemPrice / 1000 * item.discount).toFixed(2)
           }
+          item.checked = '1'
           item.itemImg = JSON.parse(item.imageUrl)[0]
           item.itemNum = this.num
-          item.productPrice = (item.price / 1000).toFixed(2)
           this.cartList.push(item)
         })
       }
     },
     created () {
-      this.userId = getStore('userId')
       let query = this.$route.query
       if (query.itemId && query.num) {
-        this.productId = query.itemId
+        this.itemId = query.itemId
         this.num = query.num
-        this._productDet(this.productId)
+        this._productDet(this.itemId)
       } else {
         this._getCartList()
       }
