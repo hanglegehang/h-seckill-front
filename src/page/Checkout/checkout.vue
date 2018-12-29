@@ -21,6 +21,7 @@
                </path>
              </svg>
              </span>
+              {{address.id}}
               <p>收货人: {{address.userName}} {{address.isDefault === 1 ? '(默认地址)' : ''}}</p>
               <p class="street-name ellipsis">收货地址: {{address.streetName}}</p>
               <p>手机号码: {{address.phone}}</p>
@@ -156,7 +157,6 @@
       return {
         cartList: [],
         addList: [],
-        id: '0',
         popupOpen: false,
         popupTitle: '管理收货地址',
         num: '',
@@ -164,10 +164,11 @@
         msg: {
           addressId: '',
           userName: '',
-          tel: '',
+          phone: '',
           streetName: '',
           isDefault: 0
         },
+        addressId: '',
         userName: '',
         phone: '',
         streetName: '',
@@ -273,7 +274,7 @@
         }
         let params = {
           userId: this.userId,
-          tel: this.tel,
+          phone: this.phone,
           userName: this.userName,
           streetName: this.streetName,
           goodsList: array,
@@ -300,10 +301,10 @@
         })
       },
       // 选择地址
-      chooseAddress (addressId, userName, tel, streetName) {
+      chooseAddress (addressId, userName, phone, streetName) {
         this.addressId = addressId
         this.userName = userName
-        this.tel = tel
+        this.phone = phone
         this.streetName = streetName
       },
       // 修改
